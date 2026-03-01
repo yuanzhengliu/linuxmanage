@@ -3,37 +3,41 @@
 import { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Send, TerminalSquare, AlertCircle, CheckCircle2, Loader2, Bot, User, Play, ChevronRight } from "lucide-react"
-import { useAuthStore } from "@/lib/store"
+import { useAuthStore, useChatStore, Message } from "@/lib/store"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import axios from "axios"
 
-type Message = {
-    id: string
-    role: "user" | "ai"
-    content: string
-    command?: string
-    explanation?: string
-    status?: "pending" | "running" | "success" | "error"
-    result?: string
-    resultExplanation?: string
-}
-
 export default function AITerminalPage() {
     const { serverId } = useAuthStore()
+    const { messages: allMessages, addMessage, updateMessage, clearOldMessages } = useChatStore()
+
+    // 現在のサーバーに対応するメッセージ群を取得
+    const messages = serverId ? (allMessages[serverId] || []) : []
+
     const [osName, setOsName] = useState<string>("Linux")
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            id: "welcome",
-            role: "ai",
-            content: `こんにちは！私は ${serverId} に接続されたAIサーバーアシスタントです。サーバーの状態確認、ソフトウェアのインストール、設定の変更などをお手伝いできます。何かご用はありますか？`
-        }
-    ])
     const [input, setInput] = useState("")
     const [isGenerating, setIsGenerating] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    // 古い履歴（30日以上前）のクリーンアップを実行
+    useEffect(() => {
+        clearOldMessages()
+    }, [clearOldMessages])
+
+    // 初回アクセス時の歓迎メッセージ
+    useEffect(() => {
+        if (serverId && messages.length === 0) {
+            addMessage(serverId, {
+                id: "welcome",
+                role: "ai",
+                content: `こんにちは！私は ${serverId} に接続されたAIサーバーアシスタントです。サーバーの状態確認、ソフトウェアのインストール、設定の変更などをお手伝いできます。何かご用はありますか？`,
+                timestamp: Date.now()
+            })
+        }
+    }, [serverId, messages.length, addMessage])
 
     useEffect(() => {
         // AIターミナルを開いた際に実際のOS情報を取得しておく
@@ -42,12 +46,12 @@ export default function AITerminalPage() {
             .then(data => {
                 if (data.os) {
                     setOsName(data.os)
-                    // 歓迎メッセージにOS名を付与
-                    setMessages(prev => prev.map(m =>
-                        m.id === "welcome"
-                            ? { ...m, content: `こんにちは！私は ${serverId} (OS: ${data.os}) に接続されたAIサーバーアシスタントです。サーバーの状態確認、ソフトウェアのインストール、設定の変更などをお手伝いできます。何かご用はありますか？` }
-                            : m
-                    ))
+                    // 歓迎メッセージにOS名を付与（ストア内のwelcomeメッセージを更新）
+                    if (serverId) {
+                        updateMessage(serverId, "welcome", {
+                            content: `こんにちは！私は ${serverId} (OS: ${data.os}) に接続されたAIサーバーアシスタントです。サーバーの状態確認、ソフトウェアのインストール、設定の変更などをお手伝いできます。何かご用はありますか？`
+                        })
+                    }
                 }
             })
             .catch(err => console.error("Failed to fetch OS status:", err))
@@ -65,8 +69,8 @@ export default function AITerminalPage() {
         e.preventDefault()
         if (!input.trim() || isGenerating) return
 
-        const userMsg: Message = { id: Date.now().toString(), role: "user", content: input }
-        setMessages(prev => [...prev, userMsg])
+        const userMsg: Message = { id: Date.now().toString(), role: "user", content: input, timestamp: Date.now() }
+        if (serverId) addMessage(serverId, userMsg)
         setInput("")
         setIsGenerating(true)
 
@@ -93,10 +97,11 @@ export default function AITerminalPage() {
                 content: response.data.message || "以下が生成されたコマンドです：",
                 command: response.data.command,
                 explanation: response.data.explanation,
-                status: response.data.command ? "pending" : undefined
+                status: response.data.command ? "pending" : undefined,
+                timestamp: Date.now()
             }
 
-            setMessages(prev => [...prev, aiMsg])
+            if (serverId) addMessage(serverId, aiMsg)
         } catch (error: unknown) {
             console.error(error)
             const err = error as { response?: { data?: { error?: string } }, message?: string }
@@ -104,15 +109,17 @@ export default function AITerminalPage() {
                 id: (Date.now() + 1).toString(),
                 role: "ai",
                 content: err.response?.data?.error || err.message || "Failed to generate command.",
+                timestamp: Date.now()
             }
-            setMessages(prev => [...prev, errorMsg])
+            if (serverId) addMessage(serverId, errorMsg)
         } finally {
             setIsGenerating(false)
         }
     }
 
     const handleExecuteCommand = async (messageId: string, cmd: string) => {
-        setMessages(prev => prev.map(m => m.id === messageId ? { ...m, status: "running" } : m))
+        if (!serverId) return
+        updateMessage(serverId, messageId, { status: "running" })
 
         try {
             const response = await axios.post("/api/server/execute", {
@@ -121,9 +128,7 @@ export default function AITerminalPage() {
             })
 
             const resultData = response.data.output
-            setMessages(prev => prev.map(m =>
-                m.id === messageId ? { ...m, status: "success", result: resultData } : m
-            ))
+            updateMessage(serverId, messageId, { status: "success", result: resultData })
 
             // 実行結果をAIに解説させる
             const provider = localStorage.getItem("aiProvider") || "openai"
@@ -137,18 +142,14 @@ export default function AITerminalPage() {
                         apiKey,
                         os: osName
                     })
-                    setMessages(prev => prev.map(m =>
-                        m.id === messageId ? { ...m, resultExplanation: explainRes.data.explanation } : m
-                    ))
+                    if (serverId) updateMessage(serverId, messageId, { resultExplanation: explainRes.data.explanation })
                 } catch (e) { console.error("Failed to explain result:", e) }
             }
 
         } catch (error: unknown) {
             const err = error as { response?: { data?: { error?: string } } }
             const resultData = err.response?.data?.error || "Execution failed"
-            setMessages(prev => prev.map(m =>
-                m.id === messageId ? { ...m, status: "error", result: resultData } : m
-            ))
+            updateMessage(serverId, messageId, { status: "error", result: resultData })
 
             // エラーの場合もAIに原因を解説させる
             const provider = localStorage.getItem("aiProvider") || "openai"
@@ -162,9 +163,7 @@ export default function AITerminalPage() {
                         apiKey,
                         os: osName
                     })
-                    setMessages(prev => prev.map(m =>
-                        m.id === messageId ? { ...m, resultExplanation: explainRes.data.explanation } : m
-                    ))
+                    if (serverId) updateMessage(serverId, messageId, { resultExplanation: explainRes.data.explanation })
                 } catch (e) { console.error("Failed to explain error:", e) }
             }
         }
