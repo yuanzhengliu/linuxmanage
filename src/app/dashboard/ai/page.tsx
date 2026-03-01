@@ -28,7 +28,7 @@ export default function AITerminalPage() {
         {
             id: "welcome",
             role: "ai",
-            content: `Hello! I am your AI Server Assistant connected to ${serverId}. I can help you inspect the server, install software, or modify configurations. How can I help you today?`
+            content: `こんにちは！私は ${serverId} に接続されたAIサーバーアシスタントです。サーバーの状態確認、ソフトウェアのインストール、設定の変更などをお手伝いできます。何かご用はありますか？`
         }
     ])
     const [input, setInput] = useState("")
@@ -45,7 +45,7 @@ export default function AITerminalPage() {
                     // 歓迎メッセージにOS名を付与
                     setMessages(prev => prev.map(m =>
                         m.id === "welcome"
-                            ? { ...m, content: `Hello! I am your AI Server Assistant connected to ${serverId} (OS: ${data.os}). I can help you inspect the server, install software, or modify configurations. How can I help you today?` }
+                            ? { ...m, content: `こんにちは！私は ${serverId} (OS: ${data.os}) に接続されたAIサーバーアシスタントです。サーバーの状態確認、ソフトウェアのインストール、設定の変更などをお手伝いできます。何かご用はありますか？` }
                             : m
                     ))
                 }
@@ -90,7 +90,7 @@ export default function AITerminalPage() {
             const aiMsg: Message = {
                 id: (Date.now() + 1).toString(),
                 role: "ai",
-                content: response.data.message || "Here is the command I generated:",
+                content: response.data.message || "以下が生成されたコマンドです：",
                 command: response.data.command,
                 explanation: response.data.explanation,
                 status: response.data.command ? "pending" : undefined
@@ -179,13 +179,13 @@ export default function AITerminalPage() {
                         AI Terminal
                     </h1>
                     <p className="text-zinc-400 mt-2">
-                        Describe what you want to do in natural language, and AI will generate and execute commands.
+                        やりたいことを自然言語で入力すると、AIがコマンドを生成・実行・解説します。
                     </p>
                 </div>
 
                 {/* Helper Chips */}
                 <div className="hidden md:flex gap-2">
-                    {["Check Disk Space", "Install Nginx", "View Active Ports"].map((suggestion) => (
+                    {["ディスク容量を確認", "Nginxのインストール", "解放ポートの確認"].map((suggestion) => (
                         <button
                             key={suggestion}
                             onClick={() => setInput(suggestion)}
@@ -321,7 +321,7 @@ export default function AITerminalPage() {
                         <Input
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="e.g. Check current RAM usage and list top 5 memory consuming processes"
+                            placeholder="例：現在のメモリ使用量を確認し、メモリ消費量トップ5のプロセスをリストアップして"
                             className="pl-12 pr-16 bg-black/60 border-zinc-700/80 focus-visible:ring-indigo-500 h-14 rounded-full text-base shadow-inner"
                             disabled={isGenerating}
                         />
@@ -335,7 +335,7 @@ export default function AITerminalPage() {
                         </Button>
                     </form>
                     <p className="text-center text-[10px] text-zinc-600 mt-2">
-                        AI generated commands should be reviewed before execution.
+                        AIが生成したコマンドは、実行する前に必ず内容を確認してください。
                     </p>
                 </div>
             </Card>

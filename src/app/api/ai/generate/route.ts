@@ -21,9 +21,9 @@ export async function POST(req: Request) {
 The user will ask you to perform a task on their ${os} server.
 You must analyze the request and provide your response STRICTLY as a valid JSON object with no additional markdown formatting. The JSON object must have exactly two keys:
 1. "command": The raw bash command to execute (combine multiple commands using && or ; if needed).
-2. "explanation": A brief, easy-to-understand explanation of what the command does.
+2. "explanation": A brief, easy-to-understand explanation of what the command does. MUST BE IN JAPANESE (日本語).
 Example user input: "Check disk space"
-Example response: {"command": "df -h", "explanation": "Checks the available and used disk space on all mounted filesystems in human-readable format."}`
+Example response: {"command": "df -h", "explanation": "すべてのマウントされたファイルシステムの利用可能なディスク容量と使用中の容量を、人間が読みやすい形式で確認します。"}`
 
         let command = ""
 

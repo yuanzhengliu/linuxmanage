@@ -30,7 +30,8 @@ Execution output:
 \`\`\`
 ${truncatedOutput}
 \`\`\`
-Analyze the output and provide a brief, easy-to-understand explanation of what happened. Was it successful? Did it error? What does the output signify?`
+Analyze the output and provide a brief, easy-to-understand explanation of what happened. Was it successful? Did it error? What does the output signify?
+IMPORTANT: You MUST write your explanation ENTIRELY IN JAPANESE (解説は必ず日本語で書いてください).`
 
         let explanation = ""
 
