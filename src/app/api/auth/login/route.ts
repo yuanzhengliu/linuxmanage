@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+// @ts-ignore
 import { Client } from "ssh2"
 
 export async function POST(req: Request) {
