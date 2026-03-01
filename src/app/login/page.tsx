@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { Terminal, ShieldAlert } from "lucide-react"
 import { useAuthStore } from "@/lib/store"
-import { MOCK_SERVERS } from "@/lib/mock-auth"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,7 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default function LoginPage() {
-    const [serverId, setServerId] = useState("")
+    const [username, setUsername] = useState("")
+    const [password, setPassword] = useState("")
     const [error, setError] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const router = useRouter()
@@ -24,15 +24,25 @@ export default function LoginPage() {
         setError("")
         setIsLoading(true)
 
-        // モックのネットワーク遅延
-        await new Promise((resolve) => setTimeout(resolve, 800))
+        try {
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
 
-        const serverData = MOCK_SERVERS[serverId]
-        if (serverData) {
-            login(serverData.id, serverData.name)
-            router.push("/dashboard")
-        } else {
-            setError("無効なサーバIDです。 (例: server-001)")
+            const data = await res.json()
+
+            if (res.ok && data.success) {
+                // ToDo: 本当はJWT等を発行すべきだが今回のアーキテクチャではZustandで簡易管理
+                login(data.serverId, data.serverName)
+                router.push("/dashboard")
+            } else {
+                setError(data.error || "Authentication failed. Invalid username or password.")
+            }
+        } catch (err) {
+            setError("Failed to connect to authentication server.")
+        } finally {
             setIsLoading(false)
         }
     }
@@ -63,16 +73,31 @@ export default function LoginPage() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="serverId">Server ID</Label>
-                                <Input
-                                    id="serverId"
-                                    placeholder="Enter Server ID (e.g. server-001)"
-                                    value={serverId}
-                                    onChange={(e) => setServerId(e.target.value)}
-                                    className="bg-black/40 border-zinc-800 focus-visible:ring-blue-500 text-lg py-6"
-                                    required
-                                />
+                            <div className="space-y-4">
+                                <div>
+                                    <Label htmlFor="username">Linux OS Username</Label>
+                                    <Input
+                                        id="username"
+                                        type="text"
+                                        placeholder="e.g. ubuntu, root"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="bg-black/40 border-zinc-800 focus-visible:ring-blue-500 mt-1"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="password">Linux User Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="bg-black/40 border-zinc-800 focus-visible:ring-blue-500 mt-1"
+                                        required
+                                    />
+                                </div>
                             </div>
 
                             {error && (
