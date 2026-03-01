@@ -1,0 +1,119 @@
+﻿笆ｲ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+node.exe : 
+発生場所 行:1 文字:1
++ & "C:\Program Files\n
+odejs/node.exe" "C:\Pro
+gram Files\nodejs/node_
+mo ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (:String) [],    
+ RemoteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+> Build error occurred
+Error: Turbopack build 
+failed with 1 errors:
+./src/app/api/ai/genera
+te/route.ts:3:1
+Export GoogleGenerative
+AI doesn't exist in tar
+get module
+[0m [90m 1 |[39m [3
+6mimport[39m { [33mNe
+xtResponse[39m } [36m
+from[39m [32m"next/se
+rver"[39m
+ [90m 2 |[39m [36mim
+port[39m [33mOpenAI[
+39m [36mfrom[39m [32
+m"openai"[39m
+[31m[1m>[22m[39m[9
+0m 3 |[39m [36mimport
+[39m { [33mGoogleGene
+rativeAI[39m } [36mfr
+om[39m [32m"@google/g
+enai"[39m
+ [90m   |[39m [31m[
+1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[39
+m[31m[1m^[22m[39m[
+31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1
+m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22
+m[39m[31m[1m^[22m[
+39m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^[
+22m[39m[31m[1m^[22m
+[39m[31m[1m^[22m[3
+9m[31m[1m^[22m[39m
+[31m[1m^[22m[39m[31
+m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m
+[39m
+ [90m 4 |[39m
+ [90m 5 |[39m [36mex
+port[39m [36masync[3
+9m [36mfunction[39m 
+[33mPOST[39m(req[33m:
+[39m [33mRequest[39m
+) {
+ [90m 6 |[39m     [3
+6mtry[39m {[0m
+
+The export GoogleGenera
+tiveAI was not found in
+ module [project]/node_
+modules/@google/genai/d
+ist/node/index.mjs [app
+-route] (ecmascript).
+Did you mean to import 
+GoogleGenAI?
+All exports of the modu
+le are statically known
+ (It doesn't have dynam
+ic exports). So it's kn
+own statically that the
+ requested export doesn
+'t exist.
+
+
+    at <unknown> (./src
+/app/api/ai/generate/ro
+ute.ts:3:1)
