@@ -8,30 +8,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useAuthStore } from "@/lib/store"
 import { cn } from "@/lib/utils"
 
-// モックのサーバステータスデータ
-const getMockSystemStatus = () => {
-    return {
-        os: "Ubuntu 22.04 LTS",
-        kernel: "5.15.0-89-generic",
-        uptime: "14 days, 5 hours, 23 minutes",
-        status: "Healthy",
-        cpuUsage: Math.floor(Math.random() * 40) + 10, // 10% - 50%
-        ramTotal: 16, // GB
-        ramUsed: (Math.random() * 5 + 4).toFixed(1), // 4GB - 9GB
-        diskTotal: 500, // GB
-        diskUsed: 234, // GB
-    }
+// APIから取得するシステムステータスの型
+interface SystemStatus {
+    os: string
+    kernel: string
+    uptime: string
+    status: string
+    cpuUsage: number
+    ramTotal: number
+    ramUsed: number | string
+    diskTotal: number
+    diskUsed: number
 }
 
 export default function DashboardPage() {
     const { serverName, serverId } = useAuthStore()
-    const [systemStatus, setSystemStatus] = useState<ReturnType<typeof getMockSystemStatus> | null>(null)
+    const [systemStatus, setSystemStatus] = useState<SystemStatus | null>(null)
 
     const [barValues, setBarValues] = useState<{ rx: number; tx: number; durRx: number; durTx: number }[]>([])
 
+    const fetchStatus = async () => {
+        try {
+            const res = await fetch("/api/server/status")
+            if (res.ok) {
+                const data = await res.json()
+                setSystemStatus(data)
+            }
+        } catch (e) {
+            console.error("Failed to fetch system status:", e)
+        }
+    }
+
     useEffect(() => {
-        // 初回マウント時にモックデータをセット
-        setSystemStatus(getMockSystemStatus())
+        // 初回マウント時に実際のデータを取得
+        fetchStatus()
 
         // グラフ用ダミーデータの初期化
         setBarValues(Array.from({ length: 40 }).map(() => ({
@@ -41,16 +51,9 @@ export default function DashboardPage() {
             durTx: 1.5 + Math.random()
         })))
 
-        // 定期的にCPU, RAM使用率を更新して動的に見せる
+        // 3秒ごとに実際のシステム情報をポーリング
         const interval = setInterval(() => {
-            setSystemStatus(prev => {
-                if (!prev) return getMockSystemStatus()
-                return {
-                    ...prev,
-                    cpuUsage: Math.max(1, Math.min(100, prev.cpuUsage + (Math.random() * 10 - 5))),
-                    ramUsed: Math.max(2, Math.min(prev.ramTotal, parseFloat(prev.ramUsed) + (Math.random() * 0.5 - 0.25))).toFixed(1)
-                }
-            })
+            fetchStatus()
         }, 3000)
 
         return () => clearInterval(interval)
