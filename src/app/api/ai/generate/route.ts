@@ -8,6 +8,7 @@ export async function POST(req: Request) {
         const prompt = body.prompt
         const provider = body.provider
         const apiKey = body.apiKey?.trim() // 空白文字を除去
+        const os = body.os || "Linux" // OS情報を受け取る（なければデフォルトでLinux）
 
         if (!prompt || !provider || !apiKey) {
             return NextResponse.json(
@@ -16,8 +17,8 @@ export async function POST(req: Request) {
             )
         }
 
-        const systemPrompt = `You are an expert Linux System Administrator. 
-The user will ask you to perform a task on their Linux server.
+        const systemPrompt = `You are an expert ${os} System Administrator. 
+The user will ask you to perform a task on their ${os} server.
 You must analyze the request and provide ONLY the raw bash command to execute to achieve their goal.
 Do not wrap the command in markdown blocks. Do not provide explanations.
 If the request requires multiple commands, combine them using && or ;.

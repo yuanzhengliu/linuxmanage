@@ -21,6 +21,7 @@ type Message = {
 
 export default function AITerminalPage() {
     const { serverId } = useAuthStore()
+    const [osName, setOsName] = useState<string>("Linux")
     const [messages, setMessages] = useState<Message[]>([
         {
             id: "welcome",
@@ -31,6 +32,24 @@ export default function AITerminalPage() {
     const [input, setInput] = useState("")
     const [isGenerating, setIsGenerating] = useState(false)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        // AIターミナルを開いた際に実際のOS情報を取得しておく
+        fetch("/api/server/status")
+            .then(res => res.json())
+            .then(data => {
+                if (data.os) {
+                    setOsName(data.os)
+                    // 歓迎メッセージにOS名を付与
+                    setMessages(prev => prev.map(m =>
+                        m.id === "welcome"
+                            ? { ...m, content: `Hello! I am your AI Server Assistant connected to ${serverId} (OS: ${data.os}). I can help you inspect the server, install software, or modify configurations. How can I help you today?` }
+                            : m
+                    ))
+                }
+            })
+            .catch(err => console.error("Failed to fetch OS status:", err))
+    }, [serverId])
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -62,7 +81,8 @@ export default function AITerminalPage() {
             const response = await axios.post("/api/ai/generate", {
                 prompt: userMsg.content,
                 provider,
-                apiKey
+                apiKey,
+                os: osName
             })
 
             const aiMsg: Message = {
