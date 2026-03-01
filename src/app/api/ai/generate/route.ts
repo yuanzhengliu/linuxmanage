@@ -19,11 +19,11 @@ export async function POST(req: Request) {
 
         const systemPrompt = `You are an expert ${os} System Administrator. 
 The user will ask you to perform a task on their ${os} server.
-You must analyze the request and provide ONLY the raw bash command to execute to achieve their goal.
-Do not wrap the command in markdown blocks. Do not provide explanations.
-If the request requires multiple commands, combine them using && or ;.
+You must analyze the request and provide your response STRICTLY as a valid JSON object with no additional markdown formatting. The JSON object must have exactly two keys:
+1. "command": The raw bash command to execute (combine multiple commands using && or ; if needed).
+2. "explanation": A brief, easy-to-understand explanation of what the command does.
 Example user input: "Check disk space"
-Example response: "df -h"`
+Example response: {"command": "df -h", "explanation": "Checks the available and used disk space on all mounted filesystems in human-readable format."}`
 
         let command = ""
 
@@ -87,11 +87,20 @@ Example response: "df -h"`
         }
 
         // クリーンアップ（マークダウン記法が混入した場合への保険）
-        command = command.replace(/^```bash\n?/g, '').replace(/^```\n?/g, '').replace(/\n?```$/g, '').trim()
+        command = command.replace(/^```json\n?/g, '').replace(/^```\n?/g, '').replace(/\n?```$/g, '').trim()
+
+        let parsedData = { command: "", explanation: "" }
+        try {
+            parsedData = JSON.parse(command)
+        } catch (parseError) {
+            console.error("Failed to parse JSON from AI:", command)
+            throw new Error("AI returned an invalid JSON response.")
+        }
 
         return NextResponse.json({
-            message: `I have generated the command for your request: "${prompt}"`,
-            command
+            message: parsedData.explanation || `I have generated the command for your request: "${prompt}"`,
+            command: parsedData.command,
+            explanation: parsedData.explanation
         })
 
     } catch (error: any) {

@@ -15,8 +15,10 @@ type Message = {
     role: "user" | "ai"
     content: string
     command?: string
+    explanation?: string
     status?: "pending" | "running" | "success" | "error"
     result?: string
+    resultExplanation?: string
 }
 
 export default function AITerminalPage() {
@@ -90,6 +92,7 @@ export default function AITerminalPage() {
                 role: "ai",
                 content: response.data.message || "Here is the command I generated:",
                 command: response.data.command,
+                explanation: response.data.explanation,
                 status: response.data.command ? "pending" : undefined
             }
 
@@ -117,14 +120,53 @@ export default function AITerminalPage() {
                 serverId
             })
 
+            const resultData = response.data.output
             setMessages(prev => prev.map(m =>
-                m.id === messageId ? { ...m, status: "success", result: response.data.output } : m
+                m.id === messageId ? { ...m, status: "success", result: resultData } : m
             ))
+
+            // 実行結果をAIに解説させる
+            const provider = localStorage.getItem("aiProvider") || "openai"
+            const apiKey = localStorage.getItem("aiApiKey")
+            if (apiKey) {
+                try {
+                    const explainRes = await axios.post("/api/ai/explain", {
+                        command: cmd,
+                        output: resultData,
+                        provider,
+                        apiKey,
+                        os: osName
+                    })
+                    setMessages(prev => prev.map(m =>
+                        m.id === messageId ? { ...m, resultExplanation: explainRes.data.explanation } : m
+                    ))
+                } catch (e) { console.error("Failed to explain result:", e) }
+            }
+
         } catch (error: unknown) {
             const err = error as { response?: { data?: { error?: string } } }
+            const resultData = err.response?.data?.error || "Execution failed"
             setMessages(prev => prev.map(m =>
-                m.id === messageId ? { ...m, status: "error", result: err.response?.data?.error || "Execution failed" } : m
+                m.id === messageId ? { ...m, status: "error", result: resultData } : m
             ))
+
+            // エラーの場合もAIに原因を解説させる
+            const provider = localStorage.getItem("aiProvider") || "openai"
+            const apiKey = localStorage.getItem("aiApiKey")
+            if (apiKey) {
+                try {
+                    const explainRes = await axios.post("/api/ai/explain", {
+                        command: cmd,
+                        output: resultData,
+                        provider,
+                        apiKey,
+                        os: osName
+                    })
+                    setMessages(prev => prev.map(m =>
+                        m.id === messageId ? { ...m, resultExplanation: explainRes.data.explanation } : m
+                    ))
+                } catch (e) { console.error("Failed to explain error:", e) }
+            }
         }
     }
 
@@ -216,6 +258,12 @@ export default function AITerminalPage() {
                                                     </span>
                                                 )}
                                             </div>
+                                            {msg.explanation && (
+                                                <div className="p-4 bg-zinc-900/50 text-sm text-zinc-300 border-b border-zinc-800">
+                                                    <p className="font-semibold text-zinc-500 mb-1 leading-none text-[10px] uppercase tracking-wider">Command Explanation</p>
+                                                    <p className="leading-relaxed">{msg.explanation}</p>
+                                                </div>
+                                            )}
                                             <div className="p-4 bg-black/60 font-mono text-sm text-green-400 overflow-x-auto">
                                                 <code>$ {msg.command}</code>
                                             </div>
@@ -229,6 +277,16 @@ export default function AITerminalPage() {
                                                         } overflow-x-auto whitespace-pre-wrap max-h-60 overflow-y-auto`}
                                                 >
                                                     {msg.result}
+                                                </motion.div>
+                                            )}
+                                            {msg.resultExplanation && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: "auto", opacity: 1 }}
+                                                    className="p-4 bg-indigo-900/20 text-indigo-200 border-t border-indigo-900/30 text-sm"
+                                                >
+                                                    <p className="font-semibold text-indigo-400 mb-2 leading-none text-xs flex items-center gap-1"><Bot className="w-3 h-3" /> AI Analysis of Result</p>
+                                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.resultExplanation}</p>
                                                 </motion.div>
                                             )}
                                         </div>
