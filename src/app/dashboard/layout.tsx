@@ -51,7 +51,7 @@ export default function DashboardLayout({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.3 }}
-                        className="h-full p-8 max-w-7xl mx-auto"
+                        className="h-full p-4 pb-28 md:p-8 max-w-7xl mx-auto"
                     >
                         {children}
                     </motion.div>

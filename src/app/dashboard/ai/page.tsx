@@ -170,25 +170,25 @@ export default function AITerminalPage() {
     }
 
     return (
-        <div className="h-[calc(100vh-6rem)] flex flex-col pt-4">
-            <div className="mb-6 flex shrink-0 items-center justify-between">
+        <div className="h-[calc(100dvh-12rem)] md:h-[calc(100vh-6rem)] flex flex-col pt-4">
+            <div className="mb-4 md:mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-                        <TerminalSquare className="w-8 h-8 text-blue-400" />
+                    <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+                        <TerminalSquare className="w-6 h-6 md:w-8 md:h-8 text-blue-400" />
                         AI Terminal
                     </h1>
-                    <p className="text-zinc-400 mt-2">
+                    <p className="text-xs md:text-sm text-zinc-400 mt-2">
                         やりたいことを自然言語で入力すると、AIがコマンドを生成・実行・解説します。
                     </p>
                 </div>
 
                 {/* Helper Chips */}
-                <div className="hidden md:flex gap-2">
+                <div className="flex overflow-x-auto whitespace-nowrap scrollbar-hide pb-2 md:pb-0 gap-2">
                     {["ディスク容量を確認", "Nginxのインストール", "解放ポートの確認"].map((suggestion) => (
                         <button
                             key={suggestion}
                             onClick={() => setInput(suggestion)}
-                            className="px-3 py-1.5 rounded-full bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 text-xs text-zinc-300 transition-colors"
+                            className="shrink-0 px-3 py-1.5 rounded-full bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 text-[11px] md:text-xs text-zinc-300 transition-colors"
                         >
                             <ChevronRight className="w-3 h-3 inline mr-1 text-blue-400" />
                             {suggestion}
@@ -208,7 +208,7 @@ export default function AITerminalPage() {
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
                             >
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-lg ${msg.role === "user"
+                                <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-lg ${msg.role === "user"
                                     ? "bg-blue-600/20 border-blue-500/30 text-blue-400"
                                     : "bg-indigo-600/20 border-indigo-500/30 text-indigo-400"
                                     }`}>
@@ -225,7 +225,7 @@ export default function AITerminalPage() {
 
                                     {/* AI Generated Command Box */}
                                     {msg.command && (
-                                        <div className="mt-3 w-full max-w-xl border border-zinc-700/50 rounded-xl overflow-hidden bg-zinc-950 shadow-inner">
+                                        <div className="mt-3 w-full max-w-sm md:max-w-xl border border-zinc-700/50 rounded-xl overflow-hidden bg-zinc-950 shadow-inner">
                                             <div className="bg-zinc-900 px-4 py-2 border-b border-zinc-800 flex justify-between items-center">
                                                 <span className="text-xs text-zinc-400 font-mono flex items-center gap-2">
                                                     <TerminalSquare className="w-3 h-3" />
@@ -295,7 +295,7 @@ export default function AITerminalPage() {
                         ))}
                         {isGenerating && (
                             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex gap-4">
-                                <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
+                                <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
                                     <Bot className="w-5 h-5 text-indigo-400" />
                                 </div>
                                 <div className="px-5 py-3 rounded-2xl rounded-tl-sm bg-zinc-800/80 border border-zinc-700/50 flex items-center gap-2">
@@ -312,28 +312,28 @@ export default function AITerminalPage() {
                 </div>
 
                 {/* Input Area */}
-                <div className="p-4 bg-zinc-900/80 border-t border-white/10 backdrop-blur-xl shrink-0">
+                <div className="p-3 md:p-4 bg-zinc-900/80 border-t border-white/10 backdrop-blur-xl shrink-0">
                     <form onSubmit={handleSendMessage} className="relative flex items-center max-w-4xl mx-auto">
-                        <div className="absolute left-4 z-10 text-zinc-500 pointer-events-none">
-                            <TerminalSquare className="w-5 h-5" />
+                        <div className="absolute left-3 md:left-4 z-10 text-zinc-500 pointer-events-none">
+                            <TerminalSquare className="w-4 h-4 md:w-5 md:h-5" />
                         </div>
                         <Input
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            placeholder="例：現在のメモリ使用量を確認し、メモリ消費量トップ5のプロセスをリストアップして"
-                            className="pl-12 pr-16 bg-black/60 border-zinc-700/80 focus-visible:ring-indigo-500 h-14 rounded-full text-base shadow-inner"
+                            placeholder="例：現在のメモリ使用量を確認して"
+                            className="pl-9 md:pl-12 pr-14 md:pr-16 bg-black/60 border-zinc-700/80 focus-visible:ring-indigo-500 h-12 md:h-14 rounded-full text-sm md:text-base shadow-inner"
                             disabled={isGenerating}
                         />
                         <Button
                             type="submit"
                             size="icon"
                             disabled={!input.trim() || isGenerating}
-                            className="absolute right-2 h-10 w-10 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-[0_0_15px_-3px_rgba(79,70,229,0.5)] hover:shadow-[0_0_20px_-3px_rgba(79,70,229,0.8)]"
+                            className="absolute right-1.5 md:right-2 h-9 w-9 md:h-10 md:w-10 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white transition-all shadow-[0_0_15px_-3px_rgba(79,70,229,0.5)] hover:shadow-[0_0_20px_-3px_rgba(79,70,229,0.8)]"
                         >
-                            <Send className="w-4 h-4 ml-0.5" />
+                            <Send className="w-3 h-3 md:w-4 md:h-4 ml-0.5" />
                         </Button>
                     </form>
-                    <p className="text-center text-[10px] text-zinc-600 mt-2">
+                    <p className="text-center text-[9px] md:text-[10px] text-zinc-600 mt-2">
                         AIが生成したコマンドは、実行する前に必ず内容を確認してください。
                     </p>
                 </div>
