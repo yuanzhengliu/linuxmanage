@@ -5,9 +5,9 @@ import { TerminalSquare, Terminal as TerminalIcon, Maximize, Minimize } from "lu
 import { useAuthStore } from "@/lib/store"
 import { Card } from "@/components/ui/card"
 import { io, Socket } from "socket.io-client"
-import { Terminal } from "xterm"
-import { FitAddon } from "xterm-addon-fit"
-import "xterm/css/xterm.css"
+import { Terminal } from "@xterm/xterm"
+import { FitAddon } from "@xterm/addon-fit"
+import "@xterm/xterm/css/xterm.css"
 
 const COMMON_COMMANDS = [
     { label: "ディスク容量 (df -h)", cmd: "df -h\n" },
