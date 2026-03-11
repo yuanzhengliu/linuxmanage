@@ -1,0 +1,44 @@
+﻿git : To https://github
+.com/yuanzhengliu/linux
+manage.git
+発生場所 行:1 文字:1
++ git push -u origin ma
+in > push_error.txt 2>&
+1
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (To https://gi   
+ th...linuxmanage.g    
+it:String) [], Rem    o
+teException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+ ! [rejected]        ma
+in -> main (fetch first
+)
+error: failed to push s
+ome refs to 'https://gi
+thub.com/yuanzhengliu/l
+inuxmanage.git'
+hint: Updates were reje
+cted because the remote
+ contains work that you
+ do not
+hint: have locally. Thi
+s is usually caused by 
+another repository push
+ing to
+hint: the same ref. If 
+you want to integrate t
+he remote changes, use
+hint: 'git pull' before
+ pushing again.
+hint: See the 'Note abo
+ut fast-forwards' in 'g
+it push --help' for det
+ails.

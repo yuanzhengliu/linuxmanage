@@ -1,0 +1,16 @@
+﻿git : Everything up-to-
+date
+発生場所 行:1 文字:1
++ git push origin main 
+> out.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (Everything up   
+ -to-date:String) [    
+], RemoteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
